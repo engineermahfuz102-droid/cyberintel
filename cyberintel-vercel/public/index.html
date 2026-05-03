@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CyberIntel Brief</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#080C12;--bg2:#0D1219;--bg3:#111820;--bg4:#161E28;
+  --b:rgba(0,220,130,.12);--b2:rgba(0,220,130,.24);
+  --g:#00DC82;--gd:rgba(0,220,130,.08);
+  --bl:#3B8BEB;--bld:rgba(59,139,235,.1);
+  --r:#FF4D6A;--rd:rgba(255,77,106,.1);
+  --o:#FF9D3D;--od:rgba(255,157,61,.1);
+  --p:#A78BFA;--pd:rgba(167,139,250,.1);
+  --c:#60D9F0;--cd:rgba(96,217,240,.08);
+  --t:#E8F0E4;--t2:#8A9E8E;--t3:#4A5E4E;
+  --mono:ui-monospace,'Cascadia Code',monospace;
+  --sans:-apple-system,'Segoe UI',system-ui,sans-serif;
+}
+body{background:var(--bg);color:var(--t);font-family:var(--sans);font-size:14px;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(0,220,130,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,220,130,.025) 1px,transparent 1px);
+  background-size:40px 40px;pointer-events:none;z-index:0}
+.wrap{position:relative;z-index:1;max-width:1320px;margin:0 auto;padding:0 22px 48px}
+
+/* TOPBAR */
+.top{display:flex;align-items:center;justify-content:space-between;padding:18px 0 20px;
+     border-bottom:1px solid var(--b);margin-bottom:22px;flex-wrap:wrap;gap:10px}
+.logo{display:flex;align-items:center;gap:12px}
+.li{width:32px;height:32px;border:1.5px solid var(--g);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ld{width:6px;height:6px;background:var(--g);border-radius:50%;box-shadow:0 0 8px var(--g);animation:blink 2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.6)}}
+.ln{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.14em;color:var(--g);text-transform:uppercase}
+.lt{font-size:10px;color:var(--t3);font-family:var(--mono);letter-spacing:.06em;margin-top:1px}
+.tr{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.pill{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;color:var(--g);
+      letter-spacing:.1em;padding:4px 10px;border:1px solid var(--b2);background:var(--gd)}
+.pd{width:5px;height:5px;background:var(--g);border-radius:50%;animation:blink 1.2s ease-in-out infinite}
+.clk{font-family:var(--mono);font-size:10px;color:var(--t3)}
+
+/* LOADING */
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;
+         min-height:300px;gap:16px;text-align:center}
+.spin{width:32px;height:32px;border:2px solid var(--b2);border-top-color:var(--g);
+      border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.load-text{font-family:var(--mono);font-size:10px;color:var(--t3);letter-spacing:.08em;text-transform:uppercase}
+
+/* ERROR */
+.error-box{border:1px solid rgba(255,77,106,.3);background:rgba(255,77,106,.05);
+           padding:20px 24px;margin:20px 0;text-align:center}
+.error-title{font-family:var(--mono);font-size:11px;color:var(--r);letter-spacing:.08em;margin-bottom:8px;text-transform:uppercase}
+.error-msg{font-size:12px;color:var(--t2);margin-bottom:14px}
+.retry-btn{font-family:var(--mono);font-size:9px;padding:6px 16px;border:1px solid var(--r);
+           background:transparent;color:var(--r);cursor:pointer;letter-spacing:.08em;text-transform:uppercase}
+.retry-btn:hover{background:var(--rd)}
+
+/* DATE TABS */
+.date-tabs{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
+.dt-label{font-family:var(--mono);font-size:8px;letter-spacing:.12em;color:var(--t3);text-transform:uppercase;margin-right:4px}
+.dtab{font-family:var(--mono);font-size:9px;letter-spacing:.06em;padding:5px 12px;
+      border:1px solid var(--b);background:transparent;color:var(--t2);cursor:pointer;transition:all .15s;text-transform:uppercase}
+.dtab:hover{border-color:var(--b2);color:var(--t)}
+.dtab.on{border-color:var(--g);color:var(--g);background:var(--gd)}
+.dtab.today-tab{border-color:rgba(0,220,130,.4)}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px}
+.stat{background:var(--bg2);border:1px solid var(--b);padding:14px 16px;position:relative;
+      overflow:hidden;transition:all .2s;cursor:default}
+.stat::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--ac,var(--g));opacity:.5}
+.stat:hover{background:var(--bg3);border-color:var(--b2)}
+.sl{font-family:var(--mono);font-size:8px;letter-spacing:.12em;color:var(--t3);text-transform:uppercase;margin-bottom:8px}
+.sv{font-family:var(--mono);font-size:26px;font-weight:700;color:var(--ac,var(--g));line-height:1;margin-bottom:3px}
+.ss{font-size:10px;color:var(--t3)}
+
+/* FILTER */
+.fbar{display:flex;align-items:center;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.fl{font-family:var(--mono);font-size:8px;letter-spacing:.12em;color:var(--t3);text-transform:uppercase;margin-right:4px}
+.fb{font-family:var(--mono);font-size:9px;letter-spacing:.06em;padding:5px 11px;
+    border:1px solid var(--b);background:transparent;color:var(--t2);cursor:pointer;transition:all .15s;text-transform:uppercase}
+.fb:hover{border-color:var(--b2);color:var(--t);background:var(--bg3)}
+.fb.on{border-color:var(--g);color:var(--g);background:var(--gd)}
+.srch{margin-left:auto;display:flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--b);padding:5px 12px}
+.srch input{background:transparent;border:none;outline:none;color:var(--t);font-family:var(--sans);font-size:12px;width:160px}
+.srch input::placeholder{color:var(--t3)}
+.si{width:11px;height:11px;border:1.5px solid var(--t3);border-radius:50%;position:relative;flex-shrink:0}
+.si::after{content:'';position:absolute;bottom:-4px;right:-4px;width:5px;height:1.5px;background:var(--t3);transform:rotate(45deg);transform-origin:left center}
+
+/* MAIN GRID */
+.grid{display:grid;grid-template-columns:1fr 290px;gap:18px;align-items:start}
+
+/* FEED */
+.feed{display:flex;flex-direction:column;gap:8px}
+.item{background:var(--bg2);border:1px solid var(--b);padding:16px 18px;
+      transition:all .15s;position:relative;overflow:hidden;animation:fadeUp .35s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--ia,var(--g));opacity:.6}
+.item:hover{background:var(--bg3);border-color:var(--b2)}
+.item:hover::before{opacity:1}
+.ih{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:7px}
+.it{font-size:13px;font-weight:500;color:var(--t);line-height:1.45;flex:1}
+.ibs{display:flex;gap:5px;flex-shrink:0;align-items:flex-start;flex-wrap:wrap;justify-content:flex-end}
+.bdg{font-family:var(--mono);font-size:8px;letter-spacing:.08em;padding:2px 6px;text-transform:uppercase;border:1px solid;white-space:nowrap}
+.bcve{color:var(--r);border-color:rgba(255,77,106,.3);background:var(--rd)}
+.bnews{color:var(--bl);border-color:rgba(59,139,235,.3);background:var(--bld)}
+.btool{color:var(--g);border-color:rgba(0,220,130,.3);background:var(--gd)}
+.bjob{color:var(--p);border-color:rgba(167,139,250,.3);background:var(--pd)}
+.bopportunity{color:var(--o);border-color:rgba(255,157,61,.3);background:var(--od)}
+.btrend{color:var(--c);border-color:rgba(96,217,240,.3);background:var(--cd)}
+.u5{color:var(--r);border-color:rgba(255,77,106,.35);background:var(--rd)}
+.u4{color:var(--o);border-color:rgba(255,157,61,.35);background:var(--od)}
+.u3{color:#EDD700;border-color:rgba(237,215,0,.3);background:rgba(237,215,0,.06)}
+.u2{color:var(--bl);border-color:rgba(59,139,235,.3);background:var(--bld)}
+.u1{color:var(--t3);border-color:rgba(100,120,100,.2);background:transparent}
+.is{font-size:12px;color:var(--t2);line-height:1.65;margin-bottom:9px}
+.if{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.im{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:8px;color:var(--t3);letter-spacing:.05em;flex-wrap:wrap}
+.il{font-family:var(--mono);font-size:8px;color:var(--g);text-decoration:none;letter-spacing:.06em;
+    display:flex;align-items:center;gap:4px;opacity:.6;transition:opacity .15s;flex-shrink:0}
+.il:hover{opacity:1}
+.arr{display:inline-block;width:7px;height:7px;border-top:1.5px solid currentColor;border-right:1.5px solid currentColor;transform:rotate(45deg)}
+.more{width:100%;padding:12px;border:1px solid var(--b);background:transparent;color:var(--t3);
+      font-family:var(--mono);font-size:9px;letter-spacing:.1em;cursor:pointer;transition:all .15s;text-transform:uppercase;margin-top:6px}
+.more:hover{background:var(--bg2);border-color:var(--b2);color:var(--g)}
+.empty{display:flex;flex-direction:column;align-items:center;padding:40px 20px;
+       text-align:center;border:1px dashed var(--b);background:var(--bg2)}
+.empty-lbl{font-family:var(--mono);font-size:9px;color:var(--t3);letter-spacing:.1em;text-transform:uppercase;margin-top:12px}
+
+/* SIDEBAR */
+.side{display:flex;flex-direction:column;gap:14px}
+.panel{background:var(--bg2);border:1px solid var(--b);overflow:hidden}
+.ph{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--b)}
+.pt{font-family:var(--mono);font-size:8px;letter-spacing:.14em;color:var(--g);text-transform:uppercase}
+.ps{font-family:var(--mono);font-size:8px;color:var(--t3)}
+
+/* THREAT */
+.tmeter{padding:18px 14px;text-align:center}
+.ring{width:100px;height:100px;margin:0 auto 14px;position:relative}
+.ring svg{transform:rotate(-90deg)}
+.rv{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.rn{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--r);line-height:1}
+.rd2{font-family:var(--mono);font-size:8px;color:var(--t3);letter-spacing:.06em;margin-top:1px}
+.tst{font-family:var(--mono);font-size:10px;letter-spacing:.08em;margin-bottom:3px}
+.tdesc{font-size:10px;color:var(--t3)}
+
+/* SOURCES */
+.srcl{padding:4px 0}
+.sr{display:flex;align-items:center;padding:7px 14px;gap:8px;transition:background .15s;cursor:default}
+.sr:hover{background:var(--bg3)}
+.sdot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.sn{font-size:10px;color:var(--t2);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bw{width:50px;height:2px;background:var(--bg4);overflow:hidden;flex-shrink:0}
+.bf{height:100%;transition:width .8s ease}
+.sc{font-family:var(--mono);font-size:8px;color:var(--t3);min-width:14px;text-align:right}
+
+/* CAT GRID */
+.cg{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--b)}
+.cc{background:var(--bg2);padding:11px 13px;cursor:pointer;transition:background .15s}
+.cc:hover{background:var(--bg3)}
+.ci{width:18px;height:18px;border:1px solid;margin-bottom:5px;display:flex;align-items:center;justify-content:center}
+.cd2{width:6px;height:6px}
+.cn{font-family:var(--mono);font-size:17px;font-weight:700;line-height:1;margin-bottom:1px}
+.cl{font-family:var(--mono);font-size:7px;letter-spacing:.1em;color:var(--t3);text-transform:uppercase}
+
+/* HISTORY */
+.hl{padding:4px 0}
+.hr2{display:flex;align-items:center;padding:8px 14px;gap:8px;transition:background .15s;cursor:pointer}
+.hr2:hover{background:var(--bg3)}
+.hr2.on{background:var(--gd)}
+.hd{font-family:var(--mono);font-size:9px;color:var(--t2);flex:1}
+.hc{font-family:var(--mono);font-size:8px;color:var(--t3)}
+.hbadge{font-family:var(--mono);font-size:8px;padding:1px 5px;border:1px solid rgba(0,220,130,.3);color:var(--g);background:var(--gd)}
+
+/* TL */
+.tl{padding:10px 14px}
+.tlr{display:flex;gap:9px;padding:5px 0;position:relative}
+.tlr:not(:last-child)::after{content:'';position:absolute;left:5px;top:14px;bottom:-4px;width:1px;background:var(--b)}
+.tld{width:10px;height:10px;border:1.5px solid;border-radius:50%;flex-shrink:0;margin-top:1px;background:var(--bg2)}
+.tlc{flex:1;min-width:0}
+.tlt{font-family:var(--mono);font-size:8px;color:var(--t3);letter-spacing:.05em;margin-bottom:2px}
+.tlx{font-size:10px;color:var(--t2);line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--b2)}
+@media(max-width:900px){.grid{grid-template-columns:1fr}.side{display:grid;grid-template-columns:1fr 1fr}.stats{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:580px){.stats{grid-template-columns:repeat(2,1fr)}.side{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div class="logo">
+      <div class="li"><div class="ld"></div></div>
+      <div>
+        <div class="ln">CyberIntel Brief</div>
+        <div class="lt">Daily Intelligence Dashboard</div>
+      </div>
+    </div>
+    <div class="tr">
+      <span class="clk" id="clk"></span>
+      <div class="pill"><div class="pd"></div>LIVE</div>
+    </div>
+  </div>
+
+  <div id="app"></div>
+
+</div>
+
+<script>
+const CAT_COLOR = {cve:"#FF4D6A",news:"#3B8BEB",tool:"#00DC82",job:"#A78BFA",opportunity:"#FF9D3D",trend:"#60D9F0"};
+const SRC_COLOR = {"BleepingComputer":"#00DC82","The Hacker News":"#3B8BEB","NVD / NIST":"#FF4D6A","GitHub Trending":"#A78BFA","HackerOne":"#FF9D3D","CISA":"#FF4D6A","Dark Reading":"#FAC775"};
+const URG_COLOR = {5:"#FF4D6A",4:"#FF9D3D",3:"#EDD700",2:"#3B8BEB",1:"#4A5E4E"};
+const URG_LBL   = {5:"CRITICAL",4:"HIGH",3:"MEDIUM",2:"LOW",1:"MINIMAL"};
+
+let allDigests   = [];
+let activeDate   = null;
+let activeFilter = "all";
+let visibleCount = 10;
+let searchQ      = "";
+
+// ── CLOCK ────────────────────────────────────────────────────────────────
+function tickClock(){
+  const n = new Date();
+  document.getElementById("clk").textContent =
+    n.toLocaleDateString("en-GB",{weekday:"short",day:"2-digit",month:"short",year:"numeric"}) +
+    "  " + n.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+}
+tickClock(); setInterval(tickClock,1000);
+
+// ── FETCH DATA ───────────────────────────────────────────────────────────
+async function loadData(){
+  const app = document.getElementById("app");
+  app.innerHTML = `<div class="loading"><div class="spin"></div><div class="load-text">Fetching your intelligence briefing...</div></div>`;
+  try {
+    const res  = await fetch("/api/digest");
+    if(!res.ok) throw new Error(`API returned ${res.status}`);
+    const data = await res.json();
+    allDigests  = data.digests || [];
+    if(allDigests.length === 0) throw new Error("No digests found. Run the agent first.");
+    activeDate = allDigests[0].date;
+    render();
+  } catch(err){
+    app.innerHTML = `
+      <div class="error-box">
+        <div class="error-title">Failed to load data</div>
+        <div class="error-msg">${err.message}</div>
+        <button class="retry-btn" onclick="loadData()">Retry</button>
+      </div>`;
+  }
+}
+
+// ── RENDER ───────────────────────────────────────────────────────────────
+function render(){
+  const digest  = allDigests.find(d => d.date === activeDate) || allDigests[0];
+  const items   = digest.items || [];
+  const today   = allDigests[0]?.date;
+  const isToday = activeDate === today;
+
+  // Filtered items
+  const filtered = items.filter(item => {
+    const matchCat = activeFilter === "all" || item.category === activeFilter;
+    const matchQ   = !searchQ || item.title.toLowerCase().includes(searchQ) || item.summary.toLowerCase().includes(searchQ);
+    return matchCat && matchQ;
+  });
+  const visible  = filtered.slice(0, visibleCount);
+  const remaining = filtered.length - visibleCount;
+
+  // Counts
+  const catCounts = {};
+  items.forEach(i => { catCounts[i.category] = (catCounts[i.category]||0)+1; });
+  const srcCounts = {};
+  items.forEach(i => { srcCounts[i.source] = (srcCounts[i.source]||0)+1; });
+  const maxSrc    = Math.max(...Object.values(srcCounts),1);
+  const critical  = items.filter(i=>i.urgency>=5).length;
+  const high      = items.filter(i=>i.urgency===4).length;
+  const cveItems  = items.filter(i=>i.category==="cve");
+  const avgCvss   = cveItems.length ? (cveItems.reduce((s,i)=>s+(i.score||0),0)/cveItems.length).toFixed(1) : "N/A";
+  const threatScore = Math.min(10, ((critical*2.5+high*1.2)/Math.max(items.length,1)*20)).toFixed(1);
+  const dashOffset  = 251 - (251 * Math.min(threatScore/10,1));
+
+  document.getElementById("app").innerHTML = `
+
+    <!-- DATE TABS -->
+    <div class="date-tabs">
+      <span class="dt-label">Digest:</span>
+      ${allDigests.map((d,i)=>`
+        <button class="dtab ${d.date===activeDate?"on":""} ${i===0?"today-tab":""}"
+          onclick="selectDate('${d.date}')">
+          ${i===0?"TODAY — ":""}${d.date}
+          <span style="font-size:8px;opacity:.6;margin-left:4px">(${(d.items||[]).length})</span>
+        </button>`).join("")}
+    </div>
+
+    <!-- STATS -->
+    <div class="stats">
+      <div class="stat" style="--ac:#00DC82"><div class="sl">Total Items</div><div class="sv">${items.length}</div><div class="ss">${isToday?"today's briefing":"this digest"}</div></div>
+      <div class="stat" style="--ac:#FF4D6A"><div class="sl">Critical</div><div class="sv">${critical}</div><div class="ss">urgency 5/5</div></div>
+      <div class="stat" style="--ac:#FF4D6A"><div class="sl">CVEs</div><div class="sv">${catCounts.cve||0}</div><div class="ss">this cycle</div></div>
+      <div class="stat" style="--ac:#3B8BEB"><div class="sl">Sources</div><div class="sv">${Object.keys(srcCounts).length}</div><div class="ss">active feeds</div></div>
+      <div class="stat" style="--ac:#FF9D3D"><div class="sl">Avg CVSS</div><div class="sv">${avgCvss}</div><div class="ss">CVE severity</div></div>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="fbar">
+      <span class="fl">Filter:</span>
+      ${["all","cve","news","tool","job","opportunity","trend"].map(f=>`
+        <button class="fb ${activeFilter===f?"on":""}" onclick="setFilter('${f}')">${f.toUpperCase()}</button>`).join("")}
+      <div class="srch">
+        <div class="si"></div>
+        <input type="text" placeholder="Search..." value="${searchQ}" oninput="setSearch(this.value)" id="srchInput">
+      </div>
+    </div>
+
+    <!-- MAIN GRID -->
+    <div class="grid">
+
+      <!-- FEED -->
+      <div>
+        <div class="feed">
+          ${visible.length===0
+            ? `<div class="empty"><div style="width:30px;height:30px;border:1px solid rgba(0,220,130,.2);display:flex;align-items:center;justify-content:center"><div style="width:12px;height:12px;border:1.5px solid #4A5E4E"></div></div><div class="empty-lbl">No items found</div></div>`
+            : visible.map((item,idx) => itemHtml(item,idx)).join("")
+          }
+        </div>
+        ${remaining>0
+          ? `<button class="more" onclick="loadMore()">Load ${remaining} more items</button>`
+          : ""}
+      </div>
+
+      <!-- SIDEBAR -->
+      <div class="side">
+
+        <!-- THREAT -->
+        <div class="panel">
+          <div class="ph"><span class="pt">Threat Level</span><span class="ps">${critical} critical</span></div>
+          <div class="tmeter">
+            <div class="ring">
+              <svg width="100" height="100" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,77,106,.1)" stroke-width="7"/>
+                <circle cx="50" cy="50" r="40" fill="none" stroke="#FF4D6A" stroke-width="7"
+                  stroke-dasharray="251" stroke-dashoffset="${dashOffset}" stroke-linecap="square"/>
+              </svg>
+              <div class="rv"><div class="rn">${threatScore}</div><div class="rd2">/ 10</div></div>
+            </div>
+            <div class="tst" style="color:${threatScore>=7?"#FF4D6A":threatScore>=4?"#FF9D3D":"#00DC82"}">
+              ${threatScore>=7?"HIGH ALERT":threatScore>=4?"ELEVATED":"NOMINAL"}
+            </div>
+            <div class="tdesc">${critical} critical, ${high} high severity</div>
+          </div>
+        </div>
+
+        <!-- HISTORY -->
+        <div class="panel">
+          <div class="ph"><span class="pt">Digest History</span><span class="ps">${allDigests.length} runs</span></div>
+          <div class="hl">
+            ${allDigests.map((d,i)=>`
+              <div class="hr2 ${d.date===activeDate?"on":""}" onclick="selectDate('${d.date}')">
+                <div class="hd">${i===0?"Today — ":""}${d.date}</div>
+                <div class="hc">${(d.items||[]).length} items</div>
+                ${i===0?`<span class="hbadge">NEW</span>`:""}
+              </div>`).join("")}
+          </div>
+        </div>
+
+        <!-- SOURCES -->
+        <div class="panel">
+          <div class="ph"><span class="pt">Sources</span><span class="ps">${Object.keys(srcCounts).length} active</span></div>
+          <div class="srcl">
+            ${Object.entries(srcCounts).sort((a,b)=>b[1]-a[1]).map(([name,cnt])=>`
+              <div class="sr">
+                <div class="sdot" style="background:${SRC_COLOR[name]||"#00DC82"}"></div>
+                <div class="sn">${name}</div>
+                <div class="bw"><div class="bf" style="width:${Math.round(cnt/maxSrc*100)}%;background:${SRC_COLOR[name]||"#00DC82"}"></div></div>
+                <div class="sc">${cnt}</div>
+              </div>`).join("")}
+          </div>
+        </div>
+
+        <!-- CATEGORIES -->
+        <div class="panel">
+          <div class="ph"><span class="pt">Categories</span></div>
+          <div class="cg">
+            ${["cve","news","tool","job","opportunity","trend"].map(cat=>`
+              <div class="cc" onclick="setFilter('${cat}')">
+                <div class="ci" style="border-color:${CAT_COLOR[cat]}">
+                  <div class="cd2" style="background:${CAT_COLOR[cat]}"></div>
+                </div>
+                <div class="cn" style="color:${CAT_COLOR[cat]}">${catCounts[cat]||0}</div>
+                <div class="cl">${cat}</div>
+              </div>`).join("")}
+          </div>
+        </div>
+
+        <!-- TIMELINE -->
+        <div class="panel">
+          <div class="ph"><span class="pt">Top Items</span></div>
+          <div class="tl">
+            ${items.slice(0,5).map(item=>`
+              <div class="tlr" style="--tlc:${CAT_COLOR[item.category]||"#00DC82"}">
+                <div class="tld" style="border-color:${CAT_COLOR[item.category]||"#00DC82"}"></div>
+                <div class="tlc">
+                  <div class="tlt">${item.source} — ${URG_LBL[item.urgency]||""}</div>
+                  <div class="tlx">${item.title}</div>
+                </div>
+              </div>`).join("")}
+          </div>
+        </div>
+
+      </div>
+    </div>`;
+}
+
+function itemHtml(item, idx){
+  const u   = item.urgency||1;
+  const cat = item.category||"news";
+  const ac  = CAT_COLOR[cat]||"#00DC82";
+  const uc  = URG_COLOR[u]||"#4A5E4E";
+  return `
+  <div class="item" style="--ia:${ac};animation-delay:${idx*.04}s">
+    <div class="ih">
+      <div class="it">${item.title}</div>
+      <div class="ibs">
+        <span class="bdg u${u}">${URG_LBL[u]}</span>
+        <span class="bdg b${cat}">${cat.toUpperCase()}</span>
+      </div>
+    </div>
+    <div class="is">${item.summary}</div>
+    <div class="if">
+      <div class="im">
+        <span>${item.source}</span>
+        <span>${item.published||""}</span>
+        ${item.score?`<span>CVSS ${item.score}</span>`:""}
+      </div>
+      <a class="il" href="${item.url}" target="_blank" rel="noopener">VIEW SOURCE <span class="arr"></span></a>
+    </div>
+  </div>`;
+}
+
+// ── CONTROLS ─────────────────────────────────────────────────────────────
+function selectDate(date){ activeDate=date; visibleCount=10; render(); }
+function setFilter(f){ activeFilter=f; visibleCount=10; render(); }
+function setSearch(q){ searchQ=q.toLowerCase(); visibleCount=10; render(); }
+function loadMore(){ visibleCount+=10; render(); }
+
+// ── INIT ─────────────────────────────────────────────────────────────────
+loadData();
+// Auto-refresh every 60 seconds
+setInterval(loadData, 60000);
+</script>
+</body>
+</html>
